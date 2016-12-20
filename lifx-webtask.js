@@ -49,6 +49,24 @@ app.get('/state', (req, res) => {
     .catch((err) => res.status(400).send(err));
 });
 
+// Get available states
+app.get('/states', (req, res) => {
+  res.send({
+    error: false,
+    message: 'List of available states',
+    states: lifx.getAvailableStates()
+  });
+});
+
+// Get available colors
+app.get('/colors', (req, res) => {
+  res.send({
+    error: false,
+    message: 'List of available colors',
+    colors: lifx.getAvailableColors()
+  });
+});
+
 // Power on / off the bulb (:state can be equal to "on" or "off")
 app.put('/power/:state', (req, res) => {
   lifx.changeState(req.params.state)
@@ -95,11 +113,13 @@ function Lifx() {
   /// Public Methods
   ///////
 
-  this.changeColor  = changeColor;
-  this.changeState  = changeState;
-  this.getState     = getState;
-  this.isAuth       = isAuth;
-  this.setToken     = setToken;
+  this.changeColor        = changeColor;
+  this.changeState        = changeState;
+  this.getAvailableColors = getAvailableColors;
+  this.getAvailableStates = getAvailableStates;
+  this.getState           = getState;
+  this.isAuth             = isAuth;
+  this.setToken           = setToken;
 
   function changeColor(color) {
     let data = {error: false, message: 'Color is set to ' + color};
@@ -122,7 +142,7 @@ function Lifx() {
 
       } else {
         data.error = true;
-        data.message = 'This is a invalid color';
+        data.message = 'This is an invalid color';
         reject(data);
       }
     });
@@ -149,10 +169,18 @@ function Lifx() {
 
       } else {
         data.error = true;
-        data.message = 'This is a invalid state';
+        data.message = 'This is an invalid state';
         reject(data);
       }
     });
+  }
+
+  function getAvailableColors() {
+    return colors;
+  }
+
+  function getAvailableStates() {
+    return states;
   }
 
   function getState() {
