@@ -23,6 +23,18 @@ app.get('/', (req, res) => {
   res.send('Lifx Webtask - Code assignment');
 });
 
+app.get('/storage', (req, res) => {
+  res.send(req.webtaskContext.storage);
+});
+
+app.post('/auth/:token', (req, res) => {
+  req.webtaskContext.storage.token = req.params.token;
+
+  res.send({
+    isAuth: true,
+  });
+});
+
 // Get the current state of the bulb
 app.get('/state', (req, res) => {
   res.send('Bulb State: On');
