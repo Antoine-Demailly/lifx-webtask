@@ -28,6 +28,7 @@ app.get('/', (req, res) => {
   }
 });
 
+// Auth route, just pass your private token in route parameters
 app.post('/auth/:token', (req, res) => {
   lifx.setToken(req.params.token, (err, message) => {
     let code = err ? 400 : 200;
