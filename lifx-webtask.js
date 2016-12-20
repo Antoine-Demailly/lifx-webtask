@@ -13,4 +13,21 @@ const app = new Express();
 app.use(bodyparser.urlencoded({extended: false}));
 app.use(bodyparser.json());
 
+// Define routes
+app.get('/', (req, res) => {
+  res.send('Lifx Webtask - Code assignment');
+});
+
+app.get('/state', (req, res) => {
+  res.send('Bulb State: On');
+});
+
+app.put('/power/:state', (req, res) => {
+  res.send(req.params.state);
+});
+
+app.put('/color/:color', (req, res) => {
+  res.send(req.params.color);
+});
+
 module.exports = WebTask.fromExpress(app);
