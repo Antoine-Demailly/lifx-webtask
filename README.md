@@ -8,6 +8,13 @@ Easily manage your Lifx Bulb
 wt create lifx-webtask.js
 ```
 
+Then config your Authentication Token:
+```
+POST YOUR_WEBTASK_URL/auth/YOUR_TOKEN
+```
+
+Config it's done.
+
 ## Routes
 
 ### Index
