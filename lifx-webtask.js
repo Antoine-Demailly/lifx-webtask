@@ -1,6 +1,7 @@
 'use strict';
 
 // Dependencies
+const _          = require('lodash@4.8.2');
 const bodyparser = require('body-parser@1.12.4');
 const Express    = require('express@4.14.0');
 const unirest    = require('unirest@0.4.2');
@@ -39,12 +40,12 @@ app.post('/auth/:token', (req, res) => {
 });
 
 // Get the current state of the bulb
-app.get('/state', (req, res) => {
+app.get('/state', authMiddleware, (req, res) => {
   res.send('Bulb State: On');
 });
 
 // Power on / off the bulb (:state can be equal to "on" or "off")
-app.put('/power/:state', (req, res) => {
+app.put('/power/:state', authMiddleware, (req, res) => {
   res.send({
     state: req.params.state,
     color: null
@@ -52,7 +53,7 @@ app.put('/power/:state', (req, res) => {
 });
 
 // Change bulb color (automatically power on)
-app.put('/color/:color', (req, res) => {
+app.put('/color/:color', authMiddleware, (req, res) => {
   res.send({
     power: 'on',
     color: req.params.color
@@ -62,6 +63,18 @@ app.put('/color/:color', (req, res) => {
 // Export application
 module.exports = WebTask.fromExpress(app);
 
+// authMiddleware
+function authMiddleware(req, res, next) {
+  if (lifx.isAuth()) {
+    next();
+  } else {
+    res.status(400).send({
+      error: true,
+      message: 'Invalid token'
+    });
+  }
+}
+
 // Lifx Model
 function Lifx() {
 
@@ -69,7 +82,9 @@ function Lifx() {
   ///////
 
   let auth    = false;
+  let colors  = ['white', 'red', 'orange', 'yellow', 'cyan', 'green', 'blue', 'purple', 'pink'];
   let headers = {};
+  let states  = ['on', 'off'];
 
   /// Public Methods
   ///////
