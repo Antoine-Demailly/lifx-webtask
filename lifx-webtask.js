@@ -9,6 +9,9 @@ const WebTask    = require('webtask-tools');
 // Define express application
 const app = new Express();
 
+// Lifx Model Instance => the model is at the bottom of the file (this a private token)
+const lifx = new Lifx('c28effba772b0f2e5a0ce6e5c8bb68480568d72fdc4911a5a910e2b38c921f39');
+
 // Config bodyparser
 app.use(bodyparser.urlencoded({extended: false}));
 app.use(bodyparser.json());
