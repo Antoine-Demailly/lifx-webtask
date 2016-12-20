@@ -31,3 +31,9 @@ app.put('/color/:color', (req, res) => {
 });
 
 module.exports = WebTask.fromExpress(app);
+
+function Lifx(token) {
+  let self = this;
+
+  self.token = token;
+}
