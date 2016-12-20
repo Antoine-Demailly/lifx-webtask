@@ -1,6 +1,6 @@
 # Lifx Webtask
 
-Easily manage your Lifx Bulb
+Easily manage your Lifx Bulb with Webtask.io
 
 ## Configuration
 
