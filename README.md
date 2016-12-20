@@ -22,10 +22,10 @@ This route just tell you if your token is config
 POST /auth/:token
 ```
 
-Params:
+#### Params:
   - **token**: String(64)
 
-Results:
+#### Results:
   - **error**: Boolean
   - **message**: String
 
@@ -34,7 +34,7 @@ Results:
 GET /state
 ```
 
-Results:
+#### Results:
   - **error**: Boolean
   - **power**: String
   - **color**: Object
@@ -44,7 +44,7 @@ Results:
 GET /states
 ```
 
-Results:
+#### Results:
   - **error**: Boolean
   - **messages**: String
   - **states**: Array of String
@@ -54,7 +54,7 @@ Results:
 GET /colors
 ```
 
-Results:
+#### Results:
   - **error**: Boolean
   - **messages**: String
   - **colors**: Array of String
@@ -64,10 +64,10 @@ Results:
 PUT /power/:state
 ```
 
-Params:
+#### Params:
   - **state**: String => available values: "on", "off"
 
-Results:
+#### Results:
   - **error**: Boolean
   - **messages**: String
 
@@ -76,9 +76,9 @@ Results:
 PUT /color/:color
 ```
 
-Params:
+#### Params:
   - **color**: String => available values: "white", "red", "orange", "yellow", "cyan", "green", "blue", "purple" or "pink"
 
-Results:
+#### Results:
   - **error**: Boolean
   - **messages**: String
