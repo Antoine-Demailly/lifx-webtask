@@ -1,6 +1,6 @@
 # Lifx Webtask
 
-Easily manage your Lifx Bulb with Webtask.io
+Easily manage your Lifx Bulb with Webtask.io.
 
 ## Configuration
 
@@ -22,7 +22,7 @@ Config it's done.
 GET /
 ```
 
-This route just tell you if your token is config
+This route just say welcome.
 
 ### Authentication
 ```

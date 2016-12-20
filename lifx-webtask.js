@@ -10,9 +10,6 @@ const WebTask    = require('webtask-tools');
 // Define express application
 const app  = new Express();
 
-// Lifx Model Instance => the model is at the bottom of the file
-const lifx = new Lifx();
-
 // Config bodyparser
 app.use(bodyparser.urlencoded({extended: false}));
 app.use(bodyparser.json());
@@ -21,21 +18,23 @@ app.use(bodyparser.json());
 ///////
 
 app.get('/', (req, res) => {
-  if (lifx.isAuth()) {
-    res.send('Lifx Webtask: Config OK');
-  } else {
-    res.send('Lifx Webtask: Please set your private token on /auth/:token');
-  }
+  res.send('Welcome to Lifx Webtask');
 });
 
 // Auth route, just pass your private token in route parameters
 app.post('/auth/:token', (req, res) => {
-  lifx.setToken(req.params.token, (err, message) => {
-    let code = err ? 400 : 200;
+  req.webtaskContext.storage.set({token: req.params.token}, {force: 1}, (err) => {
+    if (err) {
+      res.status(400).send({
+        error: true,
+        message: 'Error during authentication'
+      });
+      return;
+    }
 
-    res.status(code).send({
-      error: err,
-      message: message
+    res.send({
+      error: false,
+      message: 'Token is set',
     });
   });
 });
@@ -45,6 +44,8 @@ app.use(authMiddleware);
 
 // Get the current state of the bulb
 app.get('/state', (req, res) => {
+  let lifx = new Lifx(req.lifxToken);
+
   lifx.getState()
     .then((data) => res.send(data))
     .catch((err) => res.status(400).send(err));
@@ -52,6 +53,8 @@ app.get('/state', (req, res) => {
 
 // Get available states
 app.get('/states', (req, res) => {
+  let lifx = new Lifx(req.lifxToken);
+
   res.send({
     error: false,
     message: 'List of available states',
@@ -61,6 +64,8 @@ app.get('/states', (req, res) => {
 
 // Get available colors
 app.get('/colors', (req, res) => {
+  let lifx = new Lifx(req.lifxToken);
+
   res.send({
     error: false,
     message: 'List of available colors',
@@ -70,6 +75,8 @@ app.get('/colors', (req, res) => {
 
 // Power on / off the bulb (:state can be equal to "on" or "off")
 app.put('/power/:state', (req, res) => {
+  let lifx = new Lifx(req.lifxToken);
+
   lifx.changeState(req.params.state)
     .then((data) => res.send(data))
     .catch((err) => res.status(400).send(err));
@@ -77,6 +84,8 @@ app.put('/power/:state', (req, res) => {
 
 // Change bulb color (automatically power on)
 app.put('/color/:color', (req, res) => {
+  let lifx = new Lifx(req.lifxToken);
+
   lifx.changeColor(req.params.color)
     .then((data) => res.send(data))
     .catch((err) => res.status(400).send(err));
@@ -87,25 +96,33 @@ module.exports = WebTask.fromExpress(app);
 
 // authMiddleware
 function authMiddleware(req, res, next) {
-  if (lifx.isAuth()) {
+  req.webtaskContext.storage.get(function(err, data) {
+    if (err || _.isUndefined(data) || _.isUndefined(data.token)) {
+      res.status(403).send({
+        error: true,
+        message: 'Access denied: Please set a token in a valid format',
+      });
+
+      return;
+    }
+
+    req.lifxToken = data.token;
     next();
-  } else {
-    res.status(400).send({
-      error: true,
-      message: 'Invalid token'
-    });
-  }
+  });
 }
 
 // Lifx Model
-function Lifx() {
+function Lifx(token) {
+  token = _.isUndefined(token) ? '' : token;
 
   /// Attributes
   ///////
 
-  let auth    = false;
   let colors  = ['white', 'red', 'orange', 'yellow', 'cyan', 'green', 'blue', 'purple', 'pink'];
-  let headers = {};
+  let headers = {
+    Authorization: 'Bearer ' + token
+  };
+
   let states  = ['on', 'off'];
 
   let getEndpoint = 'https://api.lifx.com/v1/lights/all';
@@ -119,8 +136,6 @@ function Lifx() {
   this.getAvailableColors = getAvailableColors;
   this.getAvailableStates = getAvailableStates;
   this.getState           = getState;
-  this.isAuth             = isAuth;
-  this.setToken           = setToken;
 
   function changeColor(color) {
     let data = {error: false, message: 'Color is set to ' + color};
@@ -204,25 +219,6 @@ function Lifx() {
           }
         });
     });
-  }
-
-  // Just determine if a token is set with a valid Format
-  // But not if a token is valid on Lifx side
-  function isAuth() {
-    return auth;
-  }
-
-  // Set token in Lifx Model
-  function setToken(token, callback) {
-    if (typeof token == 'string' && token.length == 64) {
-      headers.Authorization = 'Bearer ' + token;
-      auth = true;
-
-      callback(false, 'Token is set');
-    } else {
-      auth = false;
-      callback(true, 'Invalid Token Format');
-    }
   }
 
   /// Private Methods
