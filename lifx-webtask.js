@@ -9,8 +9,8 @@ const WebTask    = require('webtask-tools');
 // Define express application
 const app  = new Express();
 
-// Lifx Model Instance => the model is at the bottom of the file (this a private token)
-const lifx = new Lifx('c28effba772b0f2e5a0ce6e5c8bb68480568d72fdc4911a5a910e2b38c921f39');
+// Lifx Model Instance => the model is at the bottom of the file
+const lifx = new Lifx();
 
 // Config bodyparser
 app.use(bodyparser.urlencoded({extended: false}));
@@ -20,18 +20,21 @@ app.use(bodyparser.json());
 ///////
 
 app.get('/', (req, res) => {
-  res.send('Lifx Webtask - Code assignment');
-});
-
-app.get('/storage', (req, res) => {
-  res.send(req.webtaskContext.storage);
+  if (lifx.isAuth()) {
+    res.send('Lifx Webtask: Config OK');
+  } else {
+    res.send('Lifx Webtask: Please set your private token on /auth/:token');
+  }
 });
 
 app.post('/auth/:token', (req, res) => {
-  req.webtaskContext.storage.token = req.params.token;
+  lifx.setToken(req.params.token, (err, message) => {
+    let code = err ? 400 : 200;
 
-  res.send({
-    isAuth: true,
+    res.status(code).send({
+      error: err,
+      message: message
+    });
   });
 });
 
@@ -60,8 +63,33 @@ app.put('/color/:color', (req, res) => {
 module.exports = WebTask.fromExpress(app);
 
 // Lifx Model
-function Lifx(token) {
-  let self = this;
+function Lifx() {
 
-  self.token = token;
+  /// Attributes
+  ///////
+
+  let auth    = false;
+  let headers = {};
+
+  /// Public Methods
+  ///////
+
+  this.isAuth   = isAuth;
+  this.setToken = setToken;
+
+  function isAuth() {
+    return auth;
+  }
+
+  function setToken(token, callback) {
+    if (typeof token == 'string' && token.length == 64) {
+      headers.Authorization = 'Bearer ' + token;
+      auth = true;
+
+      callback(false, 'Token is set');
+    } else {
+      callback(true, 'Invalid Token Format');
+    }
+  }
+
 }
