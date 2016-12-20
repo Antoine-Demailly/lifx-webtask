@@ -89,11 +89,21 @@ function Lifx() {
   /// Public Methods
   ///////
 
-  this.isAuth   = isAuth;
-  this.setToken = setToken;
+  this.isAuth       = isAuth;
+  this.isValidColor = isValidColor;
+  this.isValidState = isValidState;
+  this.setToken     = setToken;
 
   function isAuth() {
     return auth;
+  }
+
+  function isValidColor(color) {
+    return _.includes(colors, color);
+  }
+
+  function isValidState(state) {
+    return _.includes(states, state);
   }
 
   function setToken(token, callback) {
