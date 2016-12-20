@@ -26,11 +26,17 @@ app.get('/state', (req, res) => {
 });
 
 app.put('/power/:state', (req, res) => {
-  res.send(req.params.state);
+  res.send({
+    state: req.params.state,
+    color: null
+  });
 });
 
 app.put('/color/:color', (req, res) => {
-  res.send(req.params.color);
+  res.send({
+    power: 'on',
+    color: req.params.color
+  });
 });
 
 module.exports = WebTask.fromExpress(app);
